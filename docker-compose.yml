@@ -1,0 +1,49 @@
+version: '3'
+services:
+  nginx:
+    container_name: nginx
+    build: 
+      context: ./nginx
+      dockerfile: Dockerfile
+    ports: 
+      - 8082:80
+
+  mysql_maestro1:
+    image: mysql:5.7
+    container_name: maestro1
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: replica
+    ports:
+      - "3305:3306"
+    command: --server-id=1 --log-bin=mysql-bin --binlog-do-db=replica
+
+  mysql_maestro2:
+    image: mysql:5.7
+    container_name: maestro2
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: replica
+    ports:
+      - "3307:3306"
+    command: --server-id=2 --log-bin=mysql-bin --binlog-do-db=replica
+
+  phpmyadmin1:
+    image: phpmyadmin
+    container_name: phpAdmin1
+    ports:
+      - "8080:80"
+    environment:
+      PMA_HOSTS: "mysql_maestro1"
+      PMA_ARBITRARY: 1
+      PMA_DISABLE_SSL: 'true'
+
+  phpmyadmin2:
+    image: phpmyadmin
+    container_name: phpAdmin2
+    ports:
+      - "8081:80"
+    environment:
+      PMA_HOSTS: "mysql_maestro2"
+      PMA_ARBITRARY: 1
+      PMA_DISABLE_SSL: 'true'
